@@ -90,13 +90,15 @@ class WFF:
         targetList=self.target.split(" ")
         firstBrack=0
         secondBrack=0
-        bracket={
-            "(":firstBrack,
-            ")":secondBrack
-        }
+        falg=0
+        # if targetList[-1].find('\\') is not None:
+        #     self.errors.append('wrong')
+        #     falg=1
         for item in targetList:
-            if item== "(" or item == ")":
-                bracket[item]+=1
+            if item== "(" :
+                firstBrack+=1
+            elif item ==")":
+                secondBrack+=1
             if firstBrack<secondBrack:
                 self.errors.append('wrong')
                 return "存在不正确的括号"
@@ -116,10 +118,22 @@ class WFF:
             return True
     def norText(self):
         searchNor=r"[A-Z] /nor"
+        behindNor=r'\) /nor'
         result=re.search(searchNor,self.target,flags=0)
-        if result is not None:
+        result2=re.search(behindNor,self.target,flags=0)
+        if result is not None or result2 is not None:
             self.errors.append('wrong')
             return "命题变元后面不能出现‘非’"
+        else:
+            self.errors.append(True)
+            return True
+    def linkWord(self):
+        endWord=self.target.split(" ")
+        pat=r'\\.*'
+        end=re.search(pat,endWord[-1])
+        if end is not None:
+            self.errors.append('wrong')
+            return "结尾存在多余联结词"
         else:
             self.errors.append(True)
             return True
@@ -143,6 +157,8 @@ class WFF:
             answerList.append(self.searchConnectConjuction())
         if self.norText() is not True:
             answerList.append(self.norText())
+        if self.linkWord() is not True:
+            answerList.append(self.linkWord())
         elif 'wrong' not in self.errors:
             endLine="这是一个合式公式"
             answerList.append(endLine)
